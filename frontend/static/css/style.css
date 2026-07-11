@@ -1,0 +1,121 @@
+/* Global Styling for PPA */
+:root {
+    --brand-orange: #f97316;
+    --brand-orange-hover: #ea580c;
+    --brand-orange-rgb: 249, 115, 22;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Theme Overrides */
+.text-primary { color: var(--brand-orange) !important; }
+.bg-primary { background-color: var(--brand-orange) !important; }
+.bg-primary-subtle { background-color: rgba(var(--brand-orange-rgb), 0.1) !important; }
+.btn-primary { 
+    background-color: var(--brand-orange) !important; 
+    border-color: var(--brand-orange) !important;
+    color: white !important;
+}
+.btn-primary:hover {
+    background-color: var(--brand-orange-hover) !important;
+    border-color: var(--brand-orange-hover) !important;
+}
+.btn-outline-primary {
+    color: var(--brand-orange) !important;
+    border-color: var(--brand-orange) !important;
+}
+.btn-outline-primary:hover {
+    background-color: var(--brand-orange) !important;
+    color: white !important;
+}
+
+/* Typography utilities */
+.fw-black { font-weight: 900; }
+.fw-medium { font-weight: 500; }
+.tracking-wide { letter-spacing: 0.05em; }
+.lh-tight { line-height: 1.2; }
+.max-w-700 { max-width: 700px; }
+
+/* Custom Nav styling */
+.navbar-brand {
+    letter-spacing: -0.5px;
+}
+.hover-primary:hover {
+    color: #0d6efd !important;
+}
+.hover-white:hover {
+    color: #ffffff !important;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    overflow: hidden;
+}
+.hero-bg-shape {
+    background: radial-gradient(circle at top right, rgba(var(--brand-orange-rgb), 0.15) 0%, rgba(255, 255, 255, 0) 50%);
+    pointer-events: none;
+}
+.btn-white {
+    background-color: white;
+}
+.btn-white:hover {
+    background-color: #f8f9fa;
+}
+.hero-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+/* Mockup UI */
+.transform-tilt {
+    transform: perspective(1000px) rotateY(-15deg) rotateX(5deg);
+    transition: transform 0.5s ease;
+}
+.transform-tilt:hover {
+    transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+}
+.mock-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+/* Feature Cards */
+.transition-all {
+    transition: all 0.3s ease;
+}
+.shadow-hover:hover {
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+    transform: translateY(-5px);
+}
+.feature-icon-wrapper {
+    transition: transform 0.3s ease;
+}
+.card:hover .feature-icon-wrapper {
+    transform: scale(1.1);
+}
+
+/* Centered Form Cards for Login and Signup */
+.auth-wrapper {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
