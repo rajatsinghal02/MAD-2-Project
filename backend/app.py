@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from flask import Flask
 from flask_cors import CORS
 from database import db
+from flask_jwt_extended import JWTManager
 # pyrefly: ignore [missing-import]
 from flask import render_template
 
@@ -20,12 +21,20 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'ppa.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
+    # Configure JWT
+    app.config['JWT_SECRET_KEY'] = 'careerkite-super-secret-key-2026' # In production, use env variable
+    
     # Initialize plugins
     db.init_app(app)
+    jwt = JWTManager(app)
     
     with app.app_context():
         # Import models so they are registered with SQLAlchemy
         import models
+    
+    # Register Blueprints
+    from auth_routes import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     # API endpoints will go here...
     
