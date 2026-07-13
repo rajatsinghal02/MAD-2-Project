@@ -16,6 +16,7 @@ class Company(db.Model):
     name = db.Column(db.String(100), nullable=False)
     industry = db.Column(db.String(100), nullable=True)
     location = db.Column(db.String(150), nullable=True)
+    description = db.Column(db.Text, nullable=True)
     hr_contact = db.Column(db.String(50), nullable=True)
     website = db.Column(db.String(150), nullable=True)
     approval_status = db.Column(db.String(20), default='Pending') # Pending, Approved, Rejected, Deactivated
@@ -64,6 +65,8 @@ class Application(db.Model):
     drive_id = db.Column(db.Integer, db.ForeignKey('placement_drives.id'), nullable=False)
     application_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), default='Applied') # Applied, Shortlisted, Selected, Rejected
+    interview_date = db.Column(db.DateTime, nullable=True)
+    feedback = db.Column(db.Text, nullable=True)
 
 class Placement(db.Model):
     __tablename__ = 'placements'

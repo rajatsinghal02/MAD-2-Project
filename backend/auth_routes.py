@@ -3,7 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import User, Student, Company
 from database import db
-from datetime import timedelta
+import datetime
+import json
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -28,8 +29,9 @@ def login():
             return jsonify({"msg": f"Account status: {company.approval_status}"}), 403
 
     # Generate token
-    expires = timedelta(hours=24)
-    access_token = create_access_token(identity={"id": user.id, "role": user.role, "email": user.email}, expires_delta=expires)
+    expires = datetime.timedelta(days=1)
+    payload = json.dumps({"id": user.id, "role": user.role, "email": user.email})
+    access_token = create_access_token(identity=payload, expires_delta=expires)
     
     return jsonify({
         "token": access_token,

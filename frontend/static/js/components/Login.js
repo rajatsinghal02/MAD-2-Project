@@ -40,9 +40,12 @@ export default {
                             </div>
                             
                             <!-- Password Input -->
-                            <div class="form-floating mb-3 custom-form-floating">
-                                <input type="password" class="form-control" id="floatingPassword" placeholder="Password" v-model="password" required>
+                            <div class="form-floating mb-3 custom-form-floating position-relative">
+                                <input :type="showPassword ? 'text' : 'password'" class="form-control pe-5" id="floatingPassword" placeholder="Password" v-model="password" required>
                                 <label for="floatingPassword" class="text-muted"><i class="bi bi-lock me-2"></i>Password</label>
+                                <span class="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer text-muted fs-5" @click="showPassword = !showPassword" style="z-index: 10;" title="Toggle Password Visibility">
+                                    <i class="bi" :class="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                                </span>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -92,7 +95,8 @@ export default {
             email: '',
             password: '',
             errorMsg: '',
-            loading: false
+            loading: false,
+            showPassword: false
         }
     },
     methods: {

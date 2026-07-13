@@ -245,21 +245,69 @@ body {
     padding-left: 1rem;
 }
 
-/* Dashboard Layout */
-.dashboard-container {
+/* Modern Dashboard Layout */
+.modern-dashboard {
     display: flex;
+    flex-direction: column;
     height: 100vh;
     overflow: hidden;
     background-color: #f8fafc;
 }
 
-.sidebar {
+/* Full Width Navbar */
+.global-navbar {
+    height: 64px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    flex-shrink: 0;
+    z-index: 1030;
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    width: 236px; /* 260px - 24px padding to match sidebar roughly */
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+.toggle-btn:hover {
+    background-color: #f1f5f9;
+    color: var(--brand-orange);
+}
+
+.dashboard-body {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* Collapsible Sidebar */
+.collapsible-sidebar {
     width: 260px;
     background: #ffffff;
     border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.collapsible-sidebar.collapsed {
+    width: 76px; /* Icon only mode */
 }
 
 .sidebar-nav-link {
@@ -272,6 +320,13 @@ body {
     border-radius: 0.5rem;
     margin: 0.25rem 1rem;
     transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.collapsible-sidebar.collapsed .sidebar-nav-link {
+    margin: 0.25rem 0.5rem;
+    padding: 0.75rem;
+    justify-content: center;
 }
 
 .sidebar-nav-link:hover, .sidebar-nav-link.active {
@@ -282,6 +337,61 @@ body {
 .sidebar-nav-link i {
     font-size: 1.25rem;
     margin-right: 0.75rem;
+    transition: margin 0.3s;
+}
+
+.collapsible-sidebar.collapsed .sidebar-nav-link i {
+    margin-right: 0;
+}
+
+.nav-text {
+    transition: opacity 0.2s;
+    opacity: 1;
+}
+
+.collapsible-sidebar.collapsed .nav-text {
+    opacity: 0;
+    display: none;
+}
+
+/* Sidebar Footer Profile/Logout */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.collapsible-sidebar.collapsed .sidebar-footer {
+    flex-direction: column;
+    padding: 1rem 0.5rem;
+    gap: 1rem;
+}
+
+.profile-sm {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.collapsible-sidebar.collapsed .profile-name {
+    display: none;
+}
+
+.btn-logout-sidebar {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+}
+.btn-logout-sidebar:hover {
+    background: #fef2f2;
 }
 
 .main-content {
@@ -289,17 +399,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-}
-
-.top-header {
-    background: #ffffff;
-    height: 70px;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    flex-shrink: 0;
+    background-color: #f8fafc;
 }
 
 .content-scroll {

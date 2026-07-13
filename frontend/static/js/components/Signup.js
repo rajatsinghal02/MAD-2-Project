@@ -77,9 +77,12 @@ export default {
                                 <label for="regEmail" class="text-muted"><i class="bi bi-envelope me-2"></i>Email address</label>
                             </div>
                             
-                            <div class="form-floating mb-4 custom-form-floating">
-                                <input type="password" class="form-control" id="regPassword" placeholder="Password" v-model="password" required>
+                            <div class="form-floating mb-4 custom-form-floating position-relative">
+                                <input :type="showPassword ? 'text' : 'password'" class="form-control pe-5" id="regPassword" placeholder="Password" v-model="password" required>
                                 <label for="regPassword" class="text-muted"><i class="bi bi-lock me-2"></i>Create Password</label>
+                                <span class="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer text-muted fs-5" @click="showPassword = !showPassword" style="z-index: 10; margin-top: -12px;" title="Toggle Password Visibility">
+                                    <i class="bi" :class="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                                </span>
                                 <div class="form-text mt-2 small text-muted"><i class="bi bi-info-circle me-1"></i>Must be at least 8 characters long.</div>
                             </div>
 
@@ -121,7 +124,8 @@ export default {
             cName: '',
             errorMsg: '',
             successMsg: '',
-            loading: false
+            loading: false,
+            showPassword: false
         }
     },
     methods: {

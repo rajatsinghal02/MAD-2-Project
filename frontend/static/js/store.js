@@ -1,7 +1,8 @@
 import { reactive } from 'vue';
 
 // Try to parse stored token and user from localStorage
-const storedToken = localStorage.getItem('token');
+let storedToken = localStorage.getItem('token');
+if (storedToken === 'null' || storedToken === 'undefined') storedToken = null;
 let storedUser = null;
 try {
     const userStr = localStorage.getItem('user');
@@ -17,7 +18,7 @@ export const store = reactive({
     user: storedUser || null,
     
     get isAuthenticated() {
-        return !!this.token;
+        return !!this.token && this.token !== 'null' && this.token !== 'undefined';
     },
     
     get role() {
