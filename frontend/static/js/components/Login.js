@@ -68,22 +68,6 @@ export default {
                                 {{ loading ? 'Signing In...' : 'Sign In' }}
                             </button>
                             
-                            <!-- Divider -->
-                            <div class="d-flex align-items-center mb-4">
-                                <hr class="flex-grow-1 text-muted">
-                                <span class="mx-3 text-muted small fw-bold">OR</span>
-                                <hr class="flex-grow-1 text-muted">
-                            </div>
-                            
-                            <!-- Social Login (Mock) -->
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-light border py-2 rounded-pill fw-bold text-dark d-flex align-items-center justify-content-center hover-bg-light transition-all">
-                                    <i class="bi bi-google text-danger me-2"></i> Sign in with Google
-                                </button>
-                                <button type="button" class="btn btn-light border py-2 rounded-pill fw-bold text-dark d-flex align-items-center justify-content-center hover-bg-light transition-all">
-                                    <i class="bi bi-linkedin text-primary me-2"></i> Sign in with LinkedIn
-                                </button>
-                            </div>
                         </form>
                     </div>
                 </div>

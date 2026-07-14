@@ -50,7 +50,8 @@ def get_companies():
             "location": c.location,
             "approval_status": c.approval_status,
             "email": user.email if user else None,
-            "is_active": user.is_active if user else False
+            "is_active": user.is_active if user else False,
+            "created_at": user.created_at.isoformat() if user and user.created_at else None
         })
     return jsonify(result), 200
 
@@ -136,7 +137,8 @@ def get_students():
             "branch": s.branch,
             "cgpa": s.cgpa,
             "email": user.email if user else None,
-            "is_active": user.is_active if user else False
+            "is_active": user.is_active if user else False,
+            "created_at": user.created_at.isoformat() if user and user.created_at else None
         })
     return jsonify(result), 200
 
