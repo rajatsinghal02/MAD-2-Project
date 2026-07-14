@@ -151,10 +151,17 @@ export default {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    this.successMsg = data.msg + ". Redirecting to login...";
+                    this.successMsg = data.msg + " Redirecting to dashboard...";
+                    store.login(data.token, data.user);
                     setTimeout(() => {
-                        this.$router.push('/login');
-                    }, 2000);
+                        if (data.user.role === 'Student') {
+                            this.$router.push('/student-dashboard');
+                        } else if (data.user.role === 'Company') {
+                            this.$router.push('/company-dashboard');
+                        } else {
+                            this.$router.push('/admin-dashboard');
+                        }
+                    }, 1000);
                 } else {
                     this.errorMsg = data.msg || 'Registration failed';
                 }

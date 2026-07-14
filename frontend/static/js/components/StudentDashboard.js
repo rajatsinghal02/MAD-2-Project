@@ -14,16 +14,51 @@ export default {
                     </router-link>
                 </div>
                 
-                <div class="d-flex align-items-center gap-3 w-100 ms-3">
-                    <button @click="sidebarOpen = !sidebarOpen" class="toggle-btn me-3">
-                        <i class="bi bi-list"></i>
-                    </button>
+                <div class="d-flex align-items-center justify-content-between w-100 ms-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <button @click="sidebarOpen = !sidebarOpen" class="toggle-btn me-3">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        
+
+                    </div>
                     
-                    <div class="input-group" style="max-width: 400px;" v-if="currentTab !== 'dashboard' && currentTab !== 'profile'">
-                        <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted px-3">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control bg-light border-start-0 rounded-end-pill shadow-none" placeholder="Search..." v-model="searchQuery">
+                    <div class="ms-auto pe-4">
+                        <div class="dropdown">
+                            <button class="btn btn-light rounded-circle position-relative p-2 border-0 shadow-sm" type="button" @click="toggleNotifications">
+                                <i class="bi bi-bell fs-5 text-dark"></i>
+                                <span v-if="unreadNotificationsCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    {{ unreadNotificationsCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" :class="{ 'show': showNotifications }" style="width: 320px; max-height: 400px; overflow-y: auto; position: absolute; right: 0; left: auto;">
+                                <li>
+                                    <div class="dropdown-header fw-bold text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                                        <span>Notifications</span>
+                                        <div v-if="notifications.length > 0">
+                                            <a href="#" class="text-primary small text-decoration-none me-2" @click.prevent="markNotificationsRead">Mark all read</a>
+                                            <a href="#" class="text-danger small text-decoration-none" @click.prevent="clearNotifications">Clear all</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li v-if="notifications.length === 0"><span class="dropdown-item text-muted small py-3 text-center">No new notifications</span></li>
+                                <li v-for="notif in notifications" :key="notif.id">
+                                    <a class="dropdown-item py-2 border-bottom" :class="{'bg-light': !notif.is_read}" href="#" @click.prevent="handleNotificationClick(notif)">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2 mt-1">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center" :class="notif.is_read ? 'bg-secondary bg-opacity-10' : 'bg-primary bg-opacity-10'" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-info-circle" :class="notif.is_read ? 'text-secondary' : 'text-primary'"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 small text-wrap lh-sm" :class="{'fw-bold': !notif.is_read}">{{ notif.message }}</p>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ new Date(notif.created_at).toLocaleString() }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -229,6 +264,10 @@ export default {
                                 <h3 class="fw-black text-dark mb-1">Available Jobs</h3>
                                 <p class="text-muted fw-medium">Find your next opportunity.</p>
                             </div>
+                            <div class="input-group" style="max-width: 300px;">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted px-3"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control bg-white border-start-0 rounded-end-pill shadow-none" placeholder="Search jobs..." v-model="searchQuery">
+                            </div>
                         </div>
                         
                         <div class="row g-4">
@@ -269,7 +308,13 @@ export default {
                     
                     <!-- View: Applications -->
                     <div v-if="currentTab === 'applications'" class="animate-fade-in-up">
-                        <h3 class="fw-black text-dark mb-4">Your Applications</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-black text-dark mb-0">Your Applications</h3>
+                            <div class="input-group" style="max-width: 300px;">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted px-3"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control bg-white border-start-0 rounded-end-pill shadow-none" placeholder="Search applications..." v-model="searchQuery">
+                            </div>
+                        </div>
                         <div class="card border-0 shadow-sm rounded-4">
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -284,7 +329,7 @@ export default {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="app in applications" :key="app.id">
+                                            <tr v-for="app in filteredApplications" :key="app.id">
                                                 <td class="ps-4 fw-bold">{{ app.drive_title }}</td>
                                                 <td>{{ app.company }}</td>
                                                 <td>{{ new Date(app.application_date).toLocaleDateString() }}</td>
@@ -319,9 +364,15 @@ export default {
 
                     <!-- View: Placements -->
                     <div v-if="currentTab === 'placements'" class="animate-fade-in-up">
-                        <h3 class="fw-black text-dark mb-4">Your Placements</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-black text-dark mb-0">Your Placements</h3>
+                            <div class="input-group" style="max-width: 300px;">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted px-3"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control bg-white border-start-0 rounded-end-pill shadow-none" placeholder="Search placements..." v-model="searchQuery">
+                            </div>
+                        </div>
                         <div class="row g-4">
-                            <div class="col-md-6 col-lg-4" v-for="placement in placements" :key="placement.id">
+                            <div class="col-md-6 col-lg-4" v-for="placement in filteredPlacements" :key="placement.id">
                                 <div class="card border-0 shadow-sm rounded-4 h-100 bg-success bg-opacity-10 border border-success">
                                     <div class="card-body p-4 text-center">
                                         <i class="bi bi-award-fill text-success" style="font-size: 3rem;"></i>
@@ -531,13 +582,18 @@ export default {
                 education: '',
                 experience: '',
                 achievements: '',
-                resume_url: ''
+                resume_url: null
             },
             profileMsg: '',
-            searchQuery: ''
+            searchQuery: '',
+            notifications: [],
+            showNotifications: false
         };
     },
     computed: {
+        unreadNotificationsCount() {
+            return this.notifications.filter(n => !n.is_read).length;
+        },
         filteredJobs() {
             if (!this.searchQuery) return this.jobs;
             const q = this.searchQuery.toLowerCase();
@@ -546,9 +602,68 @@ export default {
                 (job.company && job.company.toLowerCase().includes(q)) ||
                 (job.skills_required && job.skills_required.toLowerCase().includes(q))
             );
+        },
+        filteredApplications() {
+            if (!this.searchQuery) return this.applications;
+            const q = this.searchQuery.toLowerCase();
+            return this.applications.filter(app => 
+                (app.custom_id && app.custom_id.toLowerCase().includes(q)) ||
+                (app.drive_title && app.drive_title.toLowerCase().includes(q)) ||
+                (app.company && app.company.toLowerCase().includes(q)) ||
+                (app.status && app.status.toLowerCase().includes(q))
+            );
+        },
+        filteredPlacements() {
+            if (!this.searchQuery) return this.placements;
+            const q = this.searchQuery.toLowerCase();
+            return this.placements.filter(p => 
+                (p.position && p.position.toLowerCase().includes(q)) ||
+                (p.company && p.company.toLowerCase().includes(q)) ||
+                (p.salary && String(p.salary).toLowerCase().includes(q))
+            );
+        }
+    },
+    watch: {
+        currentTab() {
+            this.searchQuery = '';
         }
     },
     methods: {
+        async fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications/', { headers: store.authHeader });
+                if (res.ok) this.notifications = await res.json();
+            } catch (err) { console.error(err); }
+        },
+        async toggleNotifications() {
+            this.showNotifications = !this.showNotifications;
+        },
+        async markNotificationsRead() {
+            if (this.unreadNotificationsCount === 0) return;
+            try {
+                await fetch('/api/notifications/read_all', { method: 'PUT', headers: store.authHeader });
+                this.notifications.forEach(n => n.is_read = true);
+            } catch (err) { console.error(err); }
+        },
+        async clearNotifications() {
+            try {
+                await fetch('/api/notifications/clear_all', { method: 'DELETE', headers: store.authHeader });
+                this.notifications = [];
+                this.showNotifications = false;
+            } catch (err) { console.error(err); }
+        },
+        async handleNotificationClick(notif) {
+            this.showNotifications = false;
+            if (!notif.is_read) {
+                try {
+                    await fetch('/api/notifications/' + notif.id + '/read', { method: 'PUT', headers: store.authHeader });
+                    notif.is_read = true;
+                } catch (err) { console.error(err); }
+            }
+            if (notif.action_url) {
+                if (notif.action_url === '#jobs') this.currentTab = 'jobs';
+            }
+        },
         handleLogout() {
             store.logout();
             this.$router.push('/login');
@@ -739,5 +854,7 @@ export default {
         this.fetchJobs();
         this.fetchApplications();
         this.fetchPlacements();
+        this.fetchNotifications();
+        setInterval(() => this.fetchNotifications(), 30000);
     }
 };

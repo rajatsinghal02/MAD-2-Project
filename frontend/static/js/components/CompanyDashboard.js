@@ -3,6 +3,18 @@ import { store } from '../store.js';
 export default {
     template: `
         <div class="modern-dashboard">
+            <!-- Full Screen Pending Blocker -->
+            <div v-if="profile.approval_status && profile.approval_status !== 'Approved'" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-white" style="z-index: 9999;">
+                <div class="text-center p-5 rounded-4 shadow-sm bg-light" style="max-width: 500px;">
+                    <i v-if="profile.approval_status === 'Pending'" class="bi bi-hourglass-split text-warning" style="font-size: 4rem;"></i>
+                    <i v-else-if="profile.approval_status === 'Rejected'" class="bi bi-x-circle text-danger" style="font-size: 4rem;"></i>
+                    <h2 class="fw-black text-dark mt-4 mb-3">Account {{ profile.approval_status }}</h2>
+                    <p class="text-muted fs-5 mb-4" v-if="profile.approval_status === 'Pending'">Your company profile has been submitted and is currently awaiting approval from the administration. You will be notified once it is approved.</p>
+                    <p class="text-muted fs-5 mb-4" v-if="profile.approval_status === 'Rejected'">Unfortunately, your company profile has not been approved by the administration at this time. Please contact support for more details.</p>
+                    <button class="btn btn-outline-dark fw-bold px-4 py-2 rounded-pill" @click="handleLogout">Log Out</button>
+                </div>
+            </div>
+
             <!-- Full Width Navbar -->
             <nav class="global-navbar shadow-sm">
                 <div class="brand-section">
@@ -14,18 +26,58 @@ export default {
                     </router-link>
                 </div>
                 
-                <div class="d-flex align-items-center gap-3 w-100 ms-3">
-                    <button @click="sidebarOpen = !sidebarOpen" class="toggle-btn me-3">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    
-                    <div class="input-group" style="max-width: 400px;" v-if="['jobs', 'applicants'].includes(currentTab)">
-                        <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted px-3">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control bg-light border-start-0 rounded-end-pill shadow-none" placeholder="Search..." v-model="searchQuery">
+                <div class="d-flex align-items-center justify-content-between w-100 ms-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <button @click="sidebarOpen = !sidebarOpen" class="toggle-btn me-3">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        
+                        <div class="input-group" style="max-width: 400px;" v-if="['jobs', 'applicants'].includes(currentTab)">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted px-3">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control bg-light border-start-0 rounded-end-pill shadow-none" placeholder="Search..." v-model="searchQuery">
+                        </div>
+                        <h4 v-else class="fw-bold mb-0 text-dark">Company Portal</h4>
                     </div>
-                    <h4 v-else class="fw-bold mb-0 text-dark">Company Portal</h4>
+                    
+                    <div class="ms-auto pe-4">
+                        <div class="dropdown">
+                            <button class="btn btn-light rounded-circle position-relative p-2 border-0 shadow-sm" type="button" @click="toggleNotifications">
+                                <i class="bi bi-bell fs-5 text-dark"></i>
+                                <span v-if="unreadNotificationsCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    {{ unreadNotificationsCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" :class="{ 'show': showNotifications }" style="width: 320px; max-height: 400px; overflow-y: auto; position: absolute; right: 0; left: auto;">
+                                <li>
+                                    <div class="dropdown-header fw-bold text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                                        <span>Notifications</span>
+                                        <div v-if="notifications.length > 0">
+                                            <a href="#" class="text-primary small text-decoration-none me-2" @click.prevent="markNotificationsRead">Mark all read</a>
+                                            <a href="#" class="text-danger small text-decoration-none" @click.prevent="clearNotifications">Clear all</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li v-if="notifications.length === 0"><span class="dropdown-item text-muted small py-3 text-center">No new notifications</span></li>
+                                <li v-for="notif in notifications" :key="notif.id">
+                                    <a class="dropdown-item py-2 border-bottom" :class="{'bg-light': !notif.is_read}" href="#" @click.prevent="handleNotificationClick(notif)">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2 mt-1">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center" :class="notif.is_read ? 'bg-secondary bg-opacity-10' : 'bg-primary bg-opacity-10'" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-info-circle" :class="notif.is_read ? 'text-secondary' : 'text-primary'"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 small text-wrap lh-sm" :class="{'fw-bold': !notif.is_read}">{{ notif.message }}</p>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ new Date(notif.created_at).toLocaleString() }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
@@ -427,13 +479,17 @@ export default {
             postJobMsg: '',
             postJobError: '',
             
-            
             selectedJobId: null,
             applicants: [],
+            notifications: [],
+            showNotifications: false,
             chartInstance: null
         };
     },
     computed: {
+        unreadNotificationsCount() {
+            return this.notifications.filter(n => !n.is_read).length;
+        },
         totalApplications() {
             return this.jobs.reduce((sum, job) => sum + (job.application_count || 0), 0);
         },
@@ -455,6 +511,42 @@ export default {
         }
     },
     methods: {
+        async fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications/', { headers: store.authHeader });
+                if (res.ok) this.notifications = await res.json();
+            } catch (err) { console.error(err); }
+        },
+        async toggleNotifications() {
+            this.showNotifications = !this.showNotifications;
+        },
+        async markNotificationsRead() {
+            if (this.unreadNotificationsCount === 0) return;
+            try {
+                await fetch('/api/notifications/read_all', { method: 'PUT', headers: store.authHeader });
+                this.notifications.forEach(n => n.is_read = true);
+            } catch (err) { console.error(err); }
+        },
+        async clearNotifications() {
+            try {
+                await fetch('/api/notifications/clear_all', { method: 'DELETE', headers: store.authHeader });
+                this.notifications = [];
+                this.showNotifications = false;
+            } catch (err) { console.error(err); }
+        },
+        async handleNotificationClick(notif) {
+            this.showNotifications = false;
+            if (!notif.is_read) {
+                try {
+                    await fetch('/api/notifications/' + notif.id + '/read', { method: 'PUT', headers: store.authHeader });
+                    notif.is_read = true;
+                } catch (err) { console.error(err); }
+            }
+            if (notif.action_url) {
+                if (notif.action_url === '#jobs') this.currentTab = 'jobs';
+                if (notif.action_url === '#applicants') this.currentTab = 'applicants';
+            }
+        },
         handleLogout() {
             store.logout();
             this.$router.push('/login');
@@ -611,5 +703,7 @@ export default {
     mounted() {
         this.fetchProfile();
         this.fetchJobs();
+        this.fetchNotifications();
+        setInterval(() => this.fetchNotifications(), 30000);
     }
 };

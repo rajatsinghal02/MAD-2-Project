@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Student, Company, PlacementDrive, Application, Placement
+from models import User, Student, Company, PlacementDrive, Application, Placement, Notification
 from database import db
 import json
 
@@ -229,6 +229,18 @@ def update_job_status(drive_id):
         return jsonify({"msg": "Drive not found"}), 404
         
     drive.status = status
+    
+    if status == 'Approved':
+        company = Company.query.get(drive.company_id)
+        students = User.query.filter_by(role='Student').all()
+        for student in students:
+            notif = Notification(
+                user_id=student.id,
+                message=f"New Job Available: {drive.title} from {company.name if company else 'a company'}!",
+                action_url="#jobs"
+            )
+            db.session.add(notif)
+            
     try:
         db.session.commit()
         return jsonify({"msg": f"Job status updated to {status}"}), 200

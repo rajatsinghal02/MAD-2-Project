@@ -14,11 +14,48 @@ export default {
                     </router-link>
                 </div>
                 
-                <div class="d-flex align-items-center gap-3 w-100 ms-3">
+                <div class="d-flex align-items-center justify-content-between w-100 ms-3">
                     <button @click="sidebarOpen = !sidebarOpen" class="toggle-btn me-3">
                         <i class="bi bi-list"></i>
                     </button>
                     
+                    <div class="ms-auto pe-4">
+                        <div class="dropdown">
+                            <button class="btn btn-light rounded-circle position-relative p-2 border-0 shadow-sm" type="button" @click="toggleNotifications">
+                                <i class="bi bi-bell fs-5 text-dark"></i>
+                                <span v-if="unreadNotificationsCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    {{ unreadNotificationsCount }}
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" :class="{ 'show': showNotifications }" style="width: 320px; max-height: 400px; overflow-y: auto; position: absolute; right: 0; left: auto;">
+                                <li>
+                                    <div class="dropdown-header fw-bold text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                                        <span>Notifications</span>
+                                        <div v-if="notifications.length > 0">
+                                            <a href="#" class="text-primary small text-decoration-none me-2" @click.prevent="markNotificationsRead">Mark all read</a>
+                                            <a href="#" class="text-danger small text-decoration-none" @click.prevent="clearNotifications">Clear all</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li v-if="notifications.length === 0"><span class="dropdown-item text-muted small py-3 text-center">No new notifications</span></li>
+                                <li v-for="notif in notifications" :key="notif.id">
+                                    <a class="dropdown-item py-2 border-bottom" :class="{'bg-light': !notif.is_read}" href="#" @click.prevent="handleNotificationClick(notif)">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2 mt-1">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center" :class="notif.is_read ? 'bg-secondary bg-opacity-10' : 'bg-primary bg-opacity-10'" style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-info-circle" :class="notif.is_read ? 'text-secondary' : 'text-primary'"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p class="mb-0 small text-wrap lh-sm" :class="{'fw-bold': !notif.is_read}">{{ notif.message }}</p>
+                                                <small class="text-muted" style="font-size: 0.7rem;">{{ new Date(notif.created_at).toLocaleString() }}</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
@@ -484,10 +521,15 @@ export default {
             applications: [],
             companyChart: null,
             appChart: null,
-            selectedCompany: null
+            selectedCompany: null,
+            notifications: [],
+            showNotifications: false
         };
     },
     computed: {
+        unreadNotificationsCount() {
+            return this.notifications.filter(n => !n.is_read).length;
+        },
         filteredCompanies() {
             if (!this.searchQuery) return this.companies;
             const q = this.searchQuery.toLowerCase();
@@ -523,6 +565,43 @@ export default {
         }
     },
     methods: {
+        async fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications/', { headers: store.authHeader });
+                if (res.ok) this.notifications = await res.json();
+            } catch (err) { console.error(err); }
+        },
+        async toggleNotifications() {
+            this.showNotifications = !this.showNotifications;
+        },
+        async markNotificationsRead() {
+            if (this.unreadNotificationsCount === 0) return;
+            try {
+                await fetch('/api/notifications/read_all', { method: 'PUT', headers: store.authHeader });
+                this.notifications.forEach(n => n.is_read = true);
+            } catch (err) { console.error(err); }
+        },
+        async clearNotifications() {
+            try {
+                await fetch('/api/notifications/clear_all', { method: 'DELETE', headers: store.authHeader });
+                this.notifications = [];
+                this.showNotifications = false;
+            } catch (err) { console.error(err); }
+        },
+        async handleNotificationClick(notif) {
+            this.showNotifications = false;
+            if (!notif.is_read) {
+                try {
+                    await fetch('/api/notifications/' + notif.id + '/read', { method: 'PUT', headers: store.authHeader });
+                    notif.is_read = true;
+                } catch (err) { console.error(err); }
+            }
+            if (notif.action_url) {
+                if (notif.action_url === '#companies') this.currentTab = 'companies';
+                if (notif.action_url === '#jobs') this.currentTab = 'jobs';
+                this.fetchStats();
+            }
+        },
         handleLogout() {
             store.logout();
             this.$router.push('/login');
@@ -712,5 +791,7 @@ export default {
     },
     mounted() {
         this.fetchStats();
+        this.fetchNotifications();
+        setInterval(() => this.fetchNotifications(), 30000);
     }
 };

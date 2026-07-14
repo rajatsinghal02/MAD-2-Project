@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Company, PlacementDrive, Application, Student, Placement
+from models import User, Company, PlacementDrive, Application, Student, Placement, Notification
 from database import db
 from datetime import datetime
 import json
@@ -121,6 +121,17 @@ def create_job():
         db.session.add(new_drive)
         db.session.flush()
         new_drive.custom_id = f"JOB-{3000 + new_drive.id}"
+        
+        # Notify Admins
+        admins = User.query.filter_by(role='Admin').all()
+        for admin in admins:
+            notif = Notification(
+                user_id=admin.id,
+                message=f"Company {company.name} has posted a new job: {title}. Requires approval.",
+                action_url="#companies"
+            )
+            db.session.add(notif)
+            
         db.session.commit()
         return jsonify({"msg": "Job created successfully. Pending Admin approval."}), 201
     except Exception as e:

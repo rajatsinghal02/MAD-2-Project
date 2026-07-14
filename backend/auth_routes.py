@@ -22,11 +22,10 @@ def login():
     if not user.is_active:
         return jsonify({"msg": "Account is inactive"}), 403
 
-    # If company, check approval status
+    # If company, we allow login so the frontend can display the pending state.
     if user.role == 'Company':
         company = Company.query.filter_by(user_id=user.id).first()
-        if company and company.approval_status != 'Approved':
-            return jsonify({"msg": f"Account status: {company.approval_status}"}), 403
+        # We no longer block login here based on company.approval_status
 
     # Generate token
     expires = datetime.timedelta(days=1)
@@ -74,7 +73,19 @@ def register_student():
         new_student.custom_id = f"STD-{1000 + new_student.id}"
         db.session.commit()
         
-        return jsonify({"msg": "Student registered successfully"}), 201
+        expires = datetime.timedelta(days=1)
+        payload = json.dumps({"id": new_user.id, "role": new_user.role, "email": new_user.email})
+        access_token = create_access_token(identity=payload, expires_delta=expires)
+        
+        return jsonify({
+            "msg": "Student registered successfully",
+            "token": access_token,
+            "user": {
+                "id": new_user.id,
+                "email": new_user.email,
+                "role": new_user.role
+            }
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": str(e)}), 500
@@ -112,7 +123,19 @@ def register_company():
         new_company.custom_id = f"CMP-{2000 + new_company.id}"
         db.session.commit()
         
-        return jsonify({"msg": "Company registered successfully. Pending admin approval."}), 201
+        expires = datetime.timedelta(days=1)
+        payload = json.dumps({"id": new_user.id, "role": new_user.role, "email": new_user.email})
+        access_token = create_access_token(identity=payload, expires_delta=expires)
+        
+        return jsonify({
+            "msg": "Company registered successfully. Pending admin approval.",
+            "token": access_token,
+            "user": {
+                "id": new_user.id,
+                "email": new_user.email,
+                "role": new_user.role
+            }
+        }), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": str(e)}), 500
