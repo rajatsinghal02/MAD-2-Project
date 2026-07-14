@@ -13,6 +13,7 @@ class User(db.Model):
 class Company(db.Model):
     __tablename__ = 'companies'
     id = db.Column(db.Integer, primary_key=True)
+    custom_id = db.Column(db.String(20), unique=True, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     industry = db.Column(db.String(100), nullable=True)
@@ -29,6 +30,7 @@ class Company(db.Model):
 class Student(db.Model):
     __tablename__ = 'students'
     id = db.Column(db.Integer, primary_key=True)
+    custom_id = db.Column(db.String(20), unique=True, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     branch = db.Column(db.String(100), nullable=True)
@@ -45,6 +47,7 @@ class Student(db.Model):
 class PlacementDrive(db.Model):
     __tablename__ = 'placement_drives'
     id = db.Column(db.Integer, primary_key=True)
+    custom_id = db.Column(db.String(20), unique=True, nullable=True)
     company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=False)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -62,6 +65,7 @@ class PlacementDrive(db.Model):
 class Application(db.Model):
     __tablename__ = 'applications'
     id = db.Column(db.Integer, primary_key=True)
+    custom_id = db.Column(db.String(20), unique=True, nullable=True)
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
     drive_id = db.Column(db.Integer, db.ForeignKey('placement_drives.id'), nullable=False)
     application_date = db.Column(db.DateTime, default=datetime.utcnow)

@@ -68,94 +68,151 @@ export default {
                 <main class="main-content">
                     <div class="content-scroll">
                     
-                    <!-- View: Dashboard / Resume Parsing -->
+                    <!-- View: Dashboard / Overview -->
                     <div v-if="currentTab === 'dashboard'" class="animate-fade-in-up">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <h3 class="fw-black text-dark mb-1">Welcome back! 👋</h3>
-                                <p class="text-muted fw-medium">Upload your latest resume to discover perfectly matched opportunities.</p>
+                                <h3 class="fw-black text-dark mb-1">Welcome back, {{ profile.name ? profile.name.split(' ')[0] : 'Student' }}! 👋</h3>
+                                <p class="text-muted fw-medium">Here's what's happening with your job search.</p>
+                            </div>
+                        </div>
+
+                        <!-- Stats Row -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm rounded-4 bg-primary text-white h-100 position-relative overflow-hidden">
+                                    <div class="card-body p-4 d-flex justify-content-between align-items-center z-1">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 opacity-75">Applications Sent</h6>
+                                            <h2 class="fw-black mb-0">{{ applications.length }}</h2>
+                                        </div>
+                                        <i class="bi bi-send fs-1 opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm rounded-4 bg-info text-white h-100 position-relative overflow-hidden">
+                                    <div class="card-body p-4 d-flex justify-content-between align-items-center z-1">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 opacity-75">Available Jobs</h6>
+                                            <h2 class="fw-black mb-0">{{ jobs.length }}</h2>
+                                        </div>
+                                        <i class="bi bi-briefcase fs-1 opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm rounded-4 bg-success text-white h-100 position-relative overflow-hidden">
+                                    <div class="card-body p-4 d-flex justify-content-between align-items-center z-1">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 opacity-75">Placements</h6>
+                                            <h2 class="fw-black mb-0">{{ placements.length }}</h2>
+                                        </div>
+                                        <i class="bi bi-award fs-1 opacity-50"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="row g-4">
-                            <!-- Left Column: Upload -->
+                            <!-- Left Column: Recent Applications & Resume -->
                             <div class="col-lg-5">
-                                <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <!-- Recent Applications -->
+                                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                                        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Latest Applications</h5>
+                                        <button class="btn btn-sm btn-light rounded-pill fw-bold" @click="currentTab = 'applications'">View All</button>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="list-group list-group-flush" v-if="applications.length > 0">
+                                            <div class="list-group-item px-4 py-3" v-for="app in applications.slice(0, 3)" :key="app.id">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 60%;">{{ app.drive_title }}</h6>
+                                                    <span class="badge" 
+                                                          :class="{
+                                                              'bg-secondary': app.status === 'Applied',
+                                                              'bg-info': app.status === 'Shortlisted',
+                                                              'bg-success': app.status === 'Selected',
+                                                              'bg-danger': app.status === 'Rejected'
+                                                          }">
+                                                        {{ app.status }}
+                                                    </span>
+                                                </div>
+                                                <small class="text-muted"><i class="bi bi-building me-1"></i>{{ app.company }} • {{ new Date(app.application_date).toLocaleDateString() }}</small>
+                                            </div>
+                                        </div>
+                                        <div v-else class="text-center py-4">
+                                            <i class="bi bi-inbox fs-3 text-muted mb-2 d-block"></i>
+                                            <p class="text-muted mb-0 small">No applications yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Smart Resume Upload -->
+                                <div class="card border-0 shadow-sm rounded-4">
                                     <div class="card-body p-4 d-flex flex-column">
-                                        <h5 class="fw-bold mb-3"><i class="bi bi-file-earmark-pdf text-primary me-2"></i>Smart Resume Upload</h5>
+                                        <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-pdf text-primary me-2"></i>Smart Resume Upload</h6>
                                         
                                         <!-- Dropzone -->
-                                        <div class="resume-dropzone flex-grow-1 d-flex flex-column align-items-center justify-content-center p-5 position-relative overflow-hidden text-center" 
+                                        <div class="resume-dropzone flex-grow-1 d-flex flex-column align-items-center justify-content-center py-4 px-3 position-relative overflow-hidden text-center rounded-3 border bg-light" 
                                              @dragover.prevent="dragActive = true" 
                                              @dragleave.prevent="dragActive = false" 
                                              @drop.prevent="handleDrop"
                                              @click="triggerFileInput"
-                                             :class="{ 'active': dragActive }">
+                                             :class="{ 'border-primary': dragActive, 'bg-primary bg-opacity-10': dragActive }" style="border-style: dashed !important; cursor: pointer;">
                                              
                                             <input type="file" ref="fileInput" class="d-none" @change="handleFileSelect" accept=".pdf,.doc,.docx">
                                             
                                             <template v-if="!uploading && !resumeParsed">
-                                                <div class="p-3 bg-white rounded-circle shadow-sm mb-3 text-primary">
-                                                    <i class="bi bi-cloud-arrow-up fs-2"></i>
-                                                </div>
-                                                <h6 class="fw-bold text-dark mb-1">Click or drag file to upload</h6>
-                                                <p class="small text-muted mb-0">PDF, DOC, DOCX (Max 5MB)</p>
+                                                <i class="bi bi-cloud-arrow-up fs-2 text-primary mb-2"></i>
+                                                <p class="fw-bold text-dark small mb-0">Click or drag file to upload</p>
                                             </template>
                                             
                                             <!-- Scanning Animation -->
                                             <template v-if="uploading">
-                                                <div class="scanner-line"></div>
-                                                <div class="spinner-border text-primary mb-3" role="status"></div>
-                                                <h6 class="fw-bold text-primary mb-1">Scrubbing Resume...</h6>
-                                                <p class="small text-muted mb-0">Our AI is extracting your skills and experience.</p>
+                                                <div class="spinner-border text-primary spinner-border-sm mb-2" role="status"></div>
+                                                <p class="fw-bold text-primary small mb-0">Scrubbing Resume...</p>
                                             </template>
                                             
                                             <!-- Success State -->
                                             <template v-if="resumeParsed && !uploading">
-                                                <div class="p-3 bg-success bg-opacity-10 rounded-circle mb-3 text-success">
-                                                    <i class="bi bi-check-circle-fill fs-2"></i>
-                                                </div>
-                                                <h6 class="fw-bold text-success mb-1">Resume Parsed Successfully!</h6>
-                                                <p class="small text-muted mb-0">{{ fileName }}</p>
-                                                <button class="btn btn-outline-secondary btn-sm rounded-pill mt-3 fw-bold" @click.stop="resetUpload">Upload Different Resume</button>
+                                                <i class="bi bi-check-circle-fill fs-2 text-success mb-2"></i>
+                                                <p class="fw-bold text-success small mb-0">Parsed Successfully!</p>
+                                                <small class="text-muted d-block mt-1">{{ fileName }}</small>
                                             </template>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Right Column: Extracted Skills & Action -->
+                            <!-- Right Column: Recommended Jobs -->
                             <div class="col-lg-7">
                                 <div class="card border-0 shadow-sm rounded-4 h-100">
+                                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                                        <h5 class="fw-bold mb-0"><i class="bi bi-star-fill text-warning me-2"></i>Recommended Jobs</h5>
+                                        <button class="btn btn-sm btn-primary rounded-pill fw-bold px-3 btn-glow shadow-primary-sm" @click="currentTab = 'jobs'">Find More</button>
+                                    </div>
                                     <div class="card-body p-4">
-                                        <h5 class="fw-bold mb-4">Extracted Profile Data</h5>
-                                        
-                                        <div v-if="!resumeParsed" class="d-flex flex-column align-items-center justify-content-center h-75 text-center px-4">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/7269/7269995.png" alt="Empty" style="width: 120px; opacity: 0.5;" class="mb-3">
-                                            <h6 class="text-muted fw-bold">Upload a resume to extract skills</h6>
-                                        </div>
-                                        
-                                        <div v-else class="animate-fade-in-up">
-                                            <h6 class="text-muted fw-bold mb-2 small text-uppercase">Top Skills Discovered</h6>
-                                            <div class="d-flex flex-wrap gap-2 mb-4">
-                                                <span v-for="(skill, index) in extractedSkills" :key="index" 
-                                                      class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 rounded-pill fw-bold skill-tag"
-                                                      :style="{'animation-delay': (index * 0.1) + 's'}">
-                                                    {{ skill }}
-                                                </span>
-                                            </div>
-                                            
-                                            <hr class="text-muted my-4">
-                                            
-                                            <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-3">
-                                                <div>
-                                                    <h6 class="fw-bold text-dark mb-0">Ready to find matches?</h6>
-                                                    <p class="small text-muted mb-0">Update your profile or view all jobs.</p>
+                                        <div class="d-flex flex-column gap-3" v-if="jobs.length > 0">
+                                            <div class="border rounded-4 p-3 hover-shadow transition-all" v-for="job in jobs.slice(0, 5)" :key="job.id">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3 text-primary d-flex align-items-center justify-content-center">
+                                                            <i class="bi bi-briefcase-fill fs-4"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="fw-bold mb-1 text-dark">{{ job.title }}</h6>
+                                                            <p class="small text-muted mb-0"><i class="bi bi-building me-1"></i>{{ job.company }} • <i class="bi bi-geo-alt ms-1 me-1"></i>{{ job.location || 'Remote' }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <button v-if="!hasApplied(job.id)" class="btn btn-outline-primary btn-sm rounded-pill fw-bold px-3 py-2" @click="applyForJob(job.id)">Apply</button>
+                                                    <span v-else class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-bold"><i class="bi bi-check-circle me-1"></i>Applied</span>
                                                 </div>
-                                                <button class="btn btn-primary rounded-pill fw-bold shadow-primary-sm btn-glow px-4" @click="currentTab = 'jobs'; fetchJobs()">
-                                                    View Matches <i class="bi bi-arrow-right ms-1"></i>
-                                                </button>
                                             </div>
+                                        </div>
+                                        <div v-else class="text-center py-5">
+                                            <i class="bi bi-search fs-1 text-muted mb-3 d-block"></i>
+                                            <p class="text-muted mb-0">No jobs available right now.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -196,7 +253,8 @@ export default {
                                             <strong>Skills:</strong> {{ job.skills_required || 'Not specified' }}
                                         </div>
                                         <div class="mt-auto pt-3 border-top">
-                                            <button class="btn btn-outline-primary w-100 rounded-pill fw-bold mt-2" @click="applyForJob(job.id)">Quick Apply</button>
+                                            <button v-if="!hasApplied(job.id)" class="btn btn-outline-primary w-100 rounded-pill fw-bold mt-2" @click="applyForJob(job.id)">Quick Apply</button>
+                                            <button v-else class="btn btn-success w-100 rounded-pill fw-bold mt-2" disabled><i class="bi bi-check-circle me-1"></i>Applied</button>
                                         </div>
                                     </div>
                                 </div>
@@ -413,6 +471,9 @@ export default {
                 console.error(err);
             }
         },
+        hasApplied(jobId) {
+            return this.applications.some(app => app.drive_id === jobId);
+        },
         async applyForJob(driveId) {
             try {
                 const res = await fetch(`/api/student/jobs/${driveId}/apply`, {
@@ -422,6 +483,7 @@ export default {
                 const data = await res.json();
                 if (res.ok) {
                     alert(data.msg);
+                    this.fetchApplications();
                 } else {
                     alert(data.msg || "Failed to apply");
                 }
@@ -503,5 +565,8 @@ export default {
     },
     mounted() {
         this.fetchProfile();
+        this.fetchJobs();
+        this.fetchApplications();
+        this.fetchPlacements();
     }
 };

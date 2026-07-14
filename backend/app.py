@@ -35,6 +35,50 @@ def create_app():
         # Initialize database automatically
         db.create_all()
         
+        # Ensure custom_id columns exist (ignoring errors if they already exist)
+        try:
+            db.session.execute(db.text('ALTER TABLE students ADD COLUMN custom_id VARCHAR(20)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE companies ADD COLUMN custom_id VARCHAR(20)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE placement_drives ADD COLUMN custom_id VARCHAR(20)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE applications ADD COLUMN custom_id VARCHAR(20)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        # Populate custom IDs for existing records
+        students = models.Student.query.filter(models.Student.custom_id == None).all()
+        for s in students:
+            s.custom_id = f"STD-{1000 + s.id}"
+        
+        companies = models.Company.query.filter(models.Company.custom_id == None).all()
+        for c in companies:
+            c.custom_id = f"CMP-{2000 + c.id}"
+            
+        jobs = models.PlacementDrive.query.filter(models.PlacementDrive.custom_id == None).all()
+        for j in jobs:
+            j.custom_id = f"JOB-{3000 + j.id}"
+            
+        apps = models.Application.query.filter(models.Application.custom_id == None).all()
+        for a in apps:
+            a.custom_id = f"APP-{4000 + a.id}"
+            
+        db.session.commit()
+        
         # Check if Admin user exists
         from werkzeug.security import generate_password_hash
         admin_email = "admin@ppa.com"

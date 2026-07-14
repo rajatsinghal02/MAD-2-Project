@@ -116,6 +116,8 @@ def create_job():
     
     try:
         db.session.add(new_drive)
+        db.session.flush()
+        new_drive.custom_id = f"JOB-{3000 + new_drive.id}"
         db.session.commit()
         return jsonify({"msg": "Job created successfully. Pending Admin approval."}), 201
     except Exception as e:

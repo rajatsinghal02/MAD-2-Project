@@ -126,6 +126,8 @@ def apply_job(drive_id):
             status='Applied'
         )
         db.session.add(new_app)
+        db.session.flush()
+        new_app.custom_id = f"APP-{4000 + new_app.id}"
         db.session.commit()
         return jsonify({"msg": "Application submitted successfully"}), 201
     except Exception as e:
@@ -152,6 +154,8 @@ def get_applications():
         company = Company.query.get(drive.company_id)
         result.append({
             "id": app.id,
+            "custom_id": app.custom_id,
+            "drive_id": drive.id,
             "drive_title": drive.title,
             "company": company.name,
             "status": app.status,

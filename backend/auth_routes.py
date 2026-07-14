@@ -70,6 +70,8 @@ def register_student():
             name=name
         )
         db.session.add(new_student)
+        db.session.flush()
+        new_student.custom_id = f"STD-{1000 + new_student.id}"
         db.session.commit()
         
         return jsonify({"msg": "Student registered successfully"}), 201
@@ -106,6 +108,8 @@ def register_company():
             approval_status='Pending'
         )
         db.session.add(new_company)
+        db.session.flush()
+        new_company.custom_id = f"CMP-{2000 + new_company.id}"
         db.session.commit()
         
         return jsonify({"msg": "Company registered successfully. Pending admin approval."}), 201
