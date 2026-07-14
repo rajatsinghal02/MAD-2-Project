@@ -296,7 +296,9 @@ export default {
                                                                   :class="{
                                                                       'bg-secondary': app.status === 'Applied',
                                                                       'bg-info': app.status === 'Shortlisted',
-                                                                      'bg-success': app.status === 'Selected',
+                                                                      'bg-primary': app.status === 'Interview',
+                                                                      'bg-warning text-dark': app.status === 'Offer',
+                                                                      'bg-success': app.status === 'Placed',
                                                                       'bg-danger': app.status === 'Rejected'
                                                                   }">
                                                                 {{ app.status }}

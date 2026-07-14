@@ -132,7 +132,9 @@ export default {
                                                           :class="{
                                                               'bg-secondary': app.status === 'Applied',
                                                               'bg-info': app.status === 'Shortlisted',
-                                                              'bg-success': app.status === 'Selected',
+                                                              'bg-primary': app.status === 'Interview',
+                                                              'bg-warning text-dark': app.status === 'Offer',
+                                                              'bg-success': app.status === 'Placed',
                                                               'bg-danger': app.status === 'Rejected'
                                                           }">
                                                         {{ app.status }}
@@ -291,7 +293,9 @@ export default {
                                                           :class="{
                                                               'bg-secondary': app.status === 'Applied',
                                                               'bg-info': app.status === 'Shortlisted',
-                                                              'bg-success': app.status === 'Selected',
+                                                              'bg-primary': app.status === 'Interview',
+                                                              'bg-warning text-dark': app.status === 'Offer',
+                                                              'bg-success': app.status === 'Placed',
                                                               'bg-danger': app.status === 'Rejected'
                                                           }">
                                                         {{ app.status }}
@@ -340,10 +344,75 @@ export default {
 
                     <!-- View: Profile -->
                     <div v-if="currentTab === 'profile'" class="animate-fade-in-up">
-                        <h3 class="fw-black text-dark mb-4">My Profile</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-black text-dark mb-0">My Profile</h3>
+                            <button v-if="!isEditingProfile" class="btn btn-primary rounded-pill fw-bold" @click="isEditingProfile = true">
+                                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                            </button>
+                        </div>
                         <div class="card border-0 shadow-sm rounded-4 max-w-800">
                             <div class="card-body p-5">
-                                <form @submit.prevent="saveProfile">
+                                <!-- Read-Only View -->
+                                <div v-if="!isEditingProfile">
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">Full Name</p>
+                                            <h6 class="fw-bold">{{ profile.name || 'Not provided' }}</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">Email Address</p>
+                                            <h6 class="fw-bold">{{ profile.email }}</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">Phone Number</p>
+                                            <h6 class="fw-bold">{{ profile.phone || 'Not provided' }}</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">Branch / Major</p>
+                                            <h6 class="fw-bold">{{ profile.branch || 'Not provided' }}</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">CGPA</p>
+                                            <h6 class="fw-bold">{{ profile.cgpa || 'Not provided' }}</h6>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="text-muted small mb-1 fw-bold">Year of Passing</p>
+                                            <h6 class="fw-bold">{{ profile.year_of_passing || 'Not provided' }}</h6>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="text-muted small mb-1 fw-bold">Education</p>
+                                            <p class="fw-medium">{{ profile.education || 'Not provided' }}</p>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="text-muted small mb-1 fw-bold">Experience</p>
+                                            <p class="fw-medium">{{ profile.experience || 'Not provided' }}</p>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="text-muted small mb-1 fw-bold">Achievements</p>
+                                            <p class="fw-medium">{{ profile.achievements || 'Not provided' }}</p>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="text-muted small mb-1 fw-bold">Skills</p>
+                                            <div>
+                                                <span v-if="profile.skills" v-for="skill in profile.skills.split(',')" class="badge bg-light text-dark border me-2 mb-2 px-3 py-2">{{ skill.trim() }}</span>
+                                                <span v-else class="text-muted">Not provided</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-12 mt-4" v-if="profile.resume_url">
+                                            <div class="p-3 bg-light rounded-3 border border-light d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h6 class="mb-1 fw-bold text-dark"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Uploaded Resume</h6>
+                                                    <p class="mb-0 text-muted small">This is the resume used for your quick applications.</p>
+                                                </div>
+                                                <a :href="profile.resume_url" target="_blank" class="btn btn-sm btn-outline-primary fw-bold px-3">View Resume</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Edit Form -->
+                                <form v-else @submit.prevent="saveProfile">
                                     <div class="row g-4 mb-4">
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-muted small">Full Name</label>
@@ -352,6 +421,10 @@ export default {
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-muted small">Email Address</label>
                                             <input type="email" class="form-control bg-light" :value="profile.email" readonly disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small">Phone Number</label>
+                                            <input type="text" class="form-control" v-model="profile.phone" placeholder="e.g. +1 234 567 8900">
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-muted small">Branch / Major</label>
@@ -366,6 +439,18 @@ export default {
                                             <input type="number" class="form-control" v-model="profile.year_of_passing" placeholder="e.g. 2024">
                                         </div>
                                         <div class="col-md-12">
+                                            <label class="form-label fw-bold text-muted small">Education</label>
+                                            <textarea class="form-control" rows="2" v-model="profile.education" placeholder="e.g. B.Tech in CS, High School"></textarea>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-muted small">Experience</label>
+                                            <textarea class="form-control" rows="2" v-model="profile.experience" placeholder="e.g. Intern at TechCorp"></textarea>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-muted small">Achievements</label>
+                                            <textarea class="form-control" rows="2" v-model="profile.achievements" placeholder="e.g. Hackathon Winner, Open Source Contributor"></textarea>
+                                        </div>
+                                        <div class="col-md-12">
                                             <label class="form-label fw-bold text-muted small">Skills (comma separated)</label>
                                             <textarea class="form-control" rows="2" v-model="profile.skills" placeholder="e.g. Python, Vue.js, Machine Learning"></textarea>
                                         </div>
@@ -375,7 +460,8 @@ export default {
                                         {{ profileMsg }}
                                     </div>
                                     
-                                    <div class="d-flex justify-content-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" @click="isEditingProfile = false">Cancel</button>
                                         <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-primary-sm btn-glow">Save Changes</button>
                                     </div>
                                 </form>
@@ -384,6 +470,38 @@ export default {
                     </div>
 
                 </div>
+            <!-- Application Confirmation Modal -->
+            <div class="modal fade" id="applyJobModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <div class="modal-header border-bottom-0 pb-0">
+                            <h5 class="modal-title fw-black"><i class="bi bi-briefcase-fill text-primary me-2"></i>Confirm Application</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4 text-center">
+                            <div v-if="profile.resume_url">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger" style="font-size: 3rem;"></i>
+                                <p class="mt-3 text-muted">You are about to apply using your currently uploaded resume:</p>
+                                <a :href="profile.resume_url" target="_blank" class="fw-bold d-block mb-4 text-decoration-none">View Current Resume</a>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary rounded-pill fw-bold" @click="submitApplication">Confirm & Apply</button>
+                                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <i class="bi bi-exclamation-circle-fill text-warning" style="font-size: 3rem;"></i>
+                                <p class="mt-3 fw-bold">No Resume Found</p>
+                                <p class="text-muted small">You need to upload a resume in your Profile section before you can apply to jobs.</p>
+                                <div class="d-grid mt-4">
+                                    <button class="btn btn-primary rounded-pill fw-bold" data-bs-dismiss="modal" @click="currentTab = 'profile'; fetchProfile()">Go to Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             </main>
         </div>
     </div>
@@ -396,8 +514,9 @@ export default {
             dragActive: false,
             uploading: false,
             resumeParsed: false,
+            isEditingProfile: false,
             fileName: '',
-            extractedSkills: [],
+            pendingDriveId: null,
             jobs: [],
             applications: [],
             placements: [],
@@ -407,7 +526,12 @@ export default {
                 branch: '',
                 cgpa: '',
                 year_of_passing: '',
-                skills: ''
+                skills: '',
+                phone: '',
+                education: '',
+                experience: '',
+                achievements: '',
+                resume_url: ''
             },
             profileMsg: '',
             searchQuery: ''
@@ -449,14 +573,32 @@ export default {
                         ...store.authHeader,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(this.profile)
+                    body: JSON.stringify({
+                        name: this.profile.name,
+                        branch: this.profile.branch,
+                        cgpa: this.profile.cgpa,
+                        year_of_passing: this.profile.year_of_passing,
+                        skills: this.profile.skills,
+                        phone: this.profile.phone,
+                        education: this.profile.education,
+                        experience: this.profile.experience,
+                        achievements: this.profile.achievements
+                    })
                 });
+                const data = await res.json();
                 if (res.ok) {
                     this.profileMsg = "Profile updated successfully!";
-                    setTimeout(() => this.profileMsg = '', 3000);
+                    setTimeout(() => { 
+                        this.profileMsg = ''; 
+                        this.isEditingProfile = false;
+                    }, 2000);
+                    this.fetchProfile();
+                } else {
+                    alert(data.msg || "Failed to update profile");
                 }
             } catch (err) {
                 console.error(err);
+                alert("An error occurred");
             }
         },
         async fetchJobs() {
@@ -474,16 +616,31 @@ export default {
         hasApplied(jobId) {
             return this.applications.some(app => app.drive_id === jobId);
         },
-        async applyForJob(driveId) {
+        applyForJob(driveId) {
+            this.pendingDriveId = driveId;
+            const modal = new bootstrap.Modal(document.getElementById('applyJobModal'));
+            modal.show();
+        },
+        async submitApplication() {
+            if (!this.pendingDriveId) return;
             try {
-                const res = await fetch(`/api/student/jobs/${driveId}/apply`, {
+                const res = await fetch(`/api/student/jobs/${this.pendingDriveId}/apply`, {
                     method: 'POST',
-                    headers: store.authHeader
+                    headers: {
+                        'Authorization': store.authHeader['Authorization'],
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ resume_url: this.profile.resume_url })
                 });
                 const data = await res.json();
+                
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
+                if (modalInstance) modalInstance.hide();
+                
                 if (res.ok) {
                     alert(data.msg);
                     this.fetchApplications();
+                    this.fetchJobs();
                 } else {
                     alert(data.msg || "Failed to apply");
                 }
@@ -521,35 +678,49 @@ export default {
         },
         handleFileSelect(event) {
             const file = event.target.files[0];
-            if (file) this.simulateParsing(file);
+            if (file) this.uploadAndParseResume(file);
         },
         handleDrop(event) {
             this.dragActive = false;
             const file = event.dataTransfer.files[0];
-            if (file) this.simulateParsing(file);
+            if (file) this.uploadAndParseResume(file);
         },
-        simulateParsing(file) {
+        async uploadAndParseResume(file) {
             this.fileName = file.name;
             this.uploading = true;
             this.resumeParsed = false;
             
-            // Simulate API upload and ML processing delay
-            setTimeout(() => {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const res = await fetch('/api/student/upload_resume', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': store.authHeader['Authorization']
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json();
                 this.uploading = false;
-                this.resumeParsed = true;
                 
-                // Mock extracted data
-                this.extractedSkills = ['Vue.js', 'Python', 'Flask', 'JavaScript', 'SQL', 'Data Analysis', 'Docker'];
-                
-                // Save skills to profile
-                this.profile.skills = this.extractedSkills.join(', ');
-                this.saveProfile();
-            }, 2500); 
+                if (res.ok) {
+                    this.resumeParsed = true;
+                    this.fetchProfile();
+                    alert("Resume uploaded successfully!");
+                } else {
+                    alert(data.msg || "Failed to parse resume");
+                }
+            } catch (err) {
+                this.uploading = false;
+                console.error(err);
+                alert("An error occurred during upload");
+            }
         },
         resetUpload() {
             this.resumeParsed = false;
             this.fileName = '';
-            this.extractedSkills = [];
         },
         downloadOffer(placement) {
             // Simulated PDF Download

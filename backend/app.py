@@ -10,7 +10,7 @@ from flask_cors import CORS
 from database import db
 from flask_jwt_extended import JWTManager
 # pyrefly: ignore [missing-import]
-from flask import render_template
+from flask import render_template, send_from_directory
 
 def create_app():
     app = Flask(__name__, template_folder='../frontend', static_folder='../frontend/static')
@@ -59,6 +59,21 @@ def create_app():
             db.session.commit()
         except Exception:
             db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE applications ADD COLUMN resume_url VARCHAR(255)'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        try:
+            db.session.execute(db.text('ALTER TABLE students ADD COLUMN phone VARCHAR(20)'))
+            db.session.execute(db.text('ALTER TABLE students ADD COLUMN education TEXT'))
+            db.session.execute(db.text('ALTER TABLE students ADD COLUMN experience TEXT'))
+            db.session.execute(db.text('ALTER TABLE students ADD COLUMN achievements TEXT'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
         # Populate custom IDs for existing records
         students = models.Student.query.filter(models.Student.custom_id == None).all()
@@ -104,6 +119,11 @@ def create_app():
     app.register_blueprint(student_bp, url_prefix='/api/student')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(company_bp, url_prefix='/api/company')
+    
+    # Serve uploaded resumes
+    @app.route('/uploads/<path:filename>')
+    def serve_uploads(filename):
+        return send_from_directory(os.path.join(basedir, 'data', 'resumes'), filename)
     
     # API endpoints will go here...
     

@@ -278,6 +278,7 @@ def get_applications():
             "job_title": drive.title if drive else "Unknown",
             "company_name": company.name if company else "Unknown",
             "status": app.status,
+            "resume_url": app.resume_url,
             "application_date": app.application_date.isoformat() if app.application_date else None
         })
         

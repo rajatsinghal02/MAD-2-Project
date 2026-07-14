@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User, Company, PlacementDrive, Application, Student
+from models import User, Company, PlacementDrive, Application, Student, Placement
 from database import db
 from datetime import datetime
 import json
@@ -86,6 +86,9 @@ def create_job():
     company = get_current_company(get_jwt_identity())
     if not company:
         return jsonify({"msg": "Unauthorized"}), 403
+        
+    if company.approval_status != 'Approved':
+        return jsonify({"msg": "Your company profile must be approved by an Admin to post jobs."}), 403
         
     data = request.get_json()
     title = data.get('title')
@@ -182,7 +185,12 @@ def get_applications(drive_id):
             "student_branch": student.branch,
             "student_cgpa": student.cgpa,
             "student_skills": student.skills,
+            "student_phone": student.phone,
+            "student_education": student.education,
+            "student_experience": student.experience,
+            "student_achievements": student.achievements,
             "status": app.status,
+            "resume_url": app.resume_url,
             "application_date": app.application_date.isoformat() if app.application_date else None,
             "interview_date": app.interview_date.isoformat() if app.interview_date else None,
             "feedback": app.feedback
@@ -212,6 +220,16 @@ def update_application_status(app_id):
     
     if status:
         app.status = status
+        if status == 'Placed':
+            existing_placement = Placement.query.filter_by(student_id=app.student_id, company_id=company.id).first()
+            if not existing_placement:
+                new_placement = Placement(
+                    student_id=app.student_id,
+                    company_id=company.id,
+                    position=drive.title,
+                    salary=drive.salary
+                )
+                db.session.add(new_placement)
     if feedback is not None:
         app.feedback = feedback
     if interview_date_str:

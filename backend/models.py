@@ -38,6 +38,10 @@ class Student(db.Model):
     year_of_passing = db.Column(db.Integer, nullable=True)
     skills = db.Column(db.String(255), nullable=True)
     resume_url = db.Column(db.String(255), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
+    education = db.Column(db.Text, nullable=True)
+    experience = db.Column(db.Text, nullable=True)
+    achievements = db.Column(db.Text, nullable=True)
     
     # Relationships
     user = db.relationship('User', backref=db.backref('student_profile', uselist=False))
@@ -70,6 +74,7 @@ class Application(db.Model):
     drive_id = db.Column(db.Integer, db.ForeignKey('placement_drives.id'), nullable=False)
     application_date = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), default='Applied') # Applied, Shortlisted, Selected, Rejected
+    resume_url = db.Column(db.String(255), nullable=True)
     interview_date = db.Column(db.DateTime, nullable=True)
     feedback = db.Column(db.Text, nullable=True)
 

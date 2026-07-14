@@ -286,12 +286,23 @@ export default {
                                                                     <div class="small">
                                                                         <strong>Skills:</strong> {{ app.student_skills || 'N/A' }}
                                                                     </div>
+                                                                    <div v-if="app.student_phone || app.student_education || app.student_experience || app.student_achievements" class="small mt-2 p-2 bg-light rounded border">
+                                                                        <div v-if="app.student_phone"><strong>Phone:</strong> {{ app.student_phone }}</div>
+                                                                        <div v-if="app.student_education"><strong>Education:</strong> {{ app.student_education }}</div>
+                                                                        <div v-if="app.student_experience"><strong>Experience:</strong> {{ app.student_experience }}</div>
+                                                                        <div v-if="app.student_achievements"><strong>Achievements:</strong> {{ app.student_achievements }}</div>
+                                                                    </div>
+                                                                    <div class="mt-2" v-if="app.resume_url">
+                                                                        <a :href="app.resume_url" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill fw-bold"><i class="bi bi-file-earmark-pdf-fill me-1"></i>View Resume</a>
+                                                                    </div>
                                                                 </div>
                                                                 <span class="badge" 
                                                                       :class="{
                                                                           'bg-secondary': app.status === 'Applied',
                                                                           'bg-info': app.status === 'Shortlisted',
-                                                                          'bg-success': app.status === 'Selected',
+                                                                          'bg-primary': app.status === 'Interview',
+                                                                          'bg-warning text-dark': app.status === 'Offer',
+                                                                          'bg-success': app.status === 'Placed',
                                                                           'bg-danger': app.status === 'Rejected'
                                                                       }">
                                                                     {{ app.status }}
@@ -306,8 +317,10 @@ export default {
                                                                         <select class="form-select form-select-sm" v-model="app.tempStatus">
                                                                             <option value="Applied">Applied</option>
                                                                             <option value="Shortlisted">Shortlisted</option>
-                                                                            <option value="Selected">Selected</option>
+                                                                            <option value="Interview">Interview</option>
+                                                                            <option value="Offer">Offer</option>
                                                                             <option value="Rejected">Rejected</option>
+                                                                            <option value="Placed">Placed</option>
                                                                         </select>
                                                                     </div>
                                                                     <div class="col-md-7" v-if="app.tempStatus === 'Shortlisted'">
